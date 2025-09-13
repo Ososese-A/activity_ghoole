@@ -77,3 +77,42 @@ Widget tagBtnComponent ({required String title, required String icon, required V
     ),
   );
 }
+
+Widget altBtnComponent ({required VoidCallback onPressed, required String title, required String icon}) {
+  return GestureDetector(
+    onTap: onPressed,
+    child: Container(
+      width: 140.0,
+      padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        border: Border.all(
+          width: 1.0
+        ),
+        borderRadius: BorderRadius.circular(8.0)
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.asset(
+            // "assets/icons/ongoing.svg"
+            icon,
+            height: 16.0,
+            width: 16.0,
+          ),
+
+          SizedBox(width: 8.0,),
+
+          Text(
+            // "Ongoing",
+            title,
+            style: TextStyle(
+              color: AppColors.priBrown,
+              fontSize: 16.0
+            ),
+          )
+        ],
+      ),
+    ),
+  );
+}
