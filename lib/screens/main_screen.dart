@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_ghoole/componenets/activity_component.dart';
+import 'package:project_ghoole/componenets/btn_component.dart';
 import 'package:project_ghoole/componenets/current_activity_component.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
 
@@ -79,20 +80,9 @@ class _MainScreenState extends State<MainScreen> {
     
               SizedBox(height: 32.0,),
     
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 24.0),
-                decoration: BoxDecoration(
-                  color: AppColors.priBrown,
-                  borderRadius: BorderRadius.circular(4.0)
-                ),
-                child: Text(
-                  "Add Activity",
-                  style: TextStyle(
-                    color: AppColors.priWhite,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w600
-                  ),
-                ),
+              btnComponent(
+                onPressed: () {},
+                title: "Add Activity"
               )
             ],
           ),

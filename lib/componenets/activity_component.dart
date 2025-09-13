@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
 
-Widget activityComponent () {
+Widget activityComponent ({bool isSelectMode = false}) {
   return GestureDetector(
     child: Container(
       padding: EdgeInsets.all(16.0),
@@ -31,8 +31,12 @@ Widget activityComponent () {
               width: 48.0,
             ),
           ),
+
+          // isSelectMode ? SizedBox(width: 16.0,) : SizedBox.shrink(),
+          SizedBox(width: 16.0,),
+
           SizedBox(
-            width: 240.0,
+            width: isSelectMode ? 200 : 240.0,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
