@@ -32,7 +32,7 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.secWhite,
-      appBar: appBar(hasOptions: false),
+      appBar: appBar(hasOptions: false, context: context),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14.0),
         child: Stack(

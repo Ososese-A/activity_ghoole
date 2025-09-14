@@ -19,7 +19,42 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.secWhite,
-      appBar: appBar(hasOptions: true),
+      appBar: appBar(
+        hasOptions: true, 
+        context: context, 
+        options: [
+          Text(
+            "Rearrange Activities",
+            style: TextStyle(
+              color: AppColors.priBrown,
+              fontSize: 14.0
+            ),
+          ),
+          Text(
+            "Add Activity",
+            style: TextStyle(
+              color: AppColors.priBrown,
+              fontSize: 14.0
+            ),
+          ),
+          Text(
+            "Remove Activity",
+            style: TextStyle(
+              color: AppColors.priBrown,
+              fontSize: 14.0
+            ),
+          ),
+        ],
+        onChange: (value) {
+          if (value != null) {
+            int i = int.parse(value);
+            if (i == 0) {
+            } else if (i == 1) {
+            } else {
+            }
+          }
+        },
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14.0),
         child: Stack(

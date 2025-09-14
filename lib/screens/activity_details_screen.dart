@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:project_ghoole/componenets/app_bar.dart';
 import 'package:project_ghoole/componenets/btn_component.dart';
+import 'package:project_ghoole/componenets/field_component.dart';
 import 'package:project_ghoole/componenets/test_calendar_component.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
 
@@ -28,7 +29,24 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.secWhite,
-      appBar: appBar(hasOptions: widget.areThereOptions),
+      appBar: appBar(
+        hasOptions: widget.areThereOptions, 
+        context: context, 
+        options: [
+          Text(
+            "Edit Activity",
+            style: TextStyle(
+              color: AppColors.priBrown,
+              fontSize: 14.0
+            ),
+          ),
+        ],
+        onChange: (value) {
+          if (value != null) {
+            _showEditDialog();
+          }
+        },
+      ),
       body: Column(
         children: [
           Padding(
@@ -170,6 +188,103 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
           )
         ],
       ),
+    );
+  }
+
+  void _showEditDialog () {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController detailController = TextEditingController();
+    final TextEditingController durationController = TextEditingController();
+    final TextEditingController hourController = TextEditingController();
+
+    String durationUnit = 'minutes';
+    final List<String> durationUnits = ['minutes', 'hours'];
+
+    final List<String> hourOptions = [
+      '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'
+    ];
+
+    showDialog(
+      context: context, 
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(8.0)
+          ),
+          backgroundColor: AppColors.priWhite,
+          content: Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 24.0),
+            width: 400,
+            height: 440,
+            child: Column(
+              children: [
+                nameFieldComponent(
+                  controller: nameController
+                ),
+    
+                const SizedBox(height: 16,),
+    
+                durationFieldComponent(
+                  controller: durationController, 
+                  unit: durationUnit, 
+                  units: durationUnits, 
+                  onChanged: (value) {
+                    setState(() {
+                      durationUnit = value!;
+                    });
+                  }
+                ),
+                
+                const SizedBox(height: 16,),
+    
+                //editable dropdown 
+                timeFieldComponent(
+                  controller: hourController, 
+                  options: hourOptions, 
+                  onSelected: (value) {
+                    setState(() {
+                      hourController.text = value;
+                    });
+                  }
+                ),
+              
+                SizedBox(height: 16,),
+    
+                detailsFieldComponent(
+                  controller: detailController
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                txtBtnComponent(
+                  onTap: () {
+                    Navigator.pop(context);
+                  }, 
+                  title: "Cancel"
+                ),
+                btnComponent(
+                  onPressed: () {
+                    String activity = nameController.text;
+                    String duration = durationController.text;
+                    String time = hourController.text;
+                    String details = detailController.text;
+
+                    debugPrint("This is the activity: $activity, this is the duration $duration $durationUnit, this is the time $time");
+                    debugPrint("This is the details: $details");
+
+                    Navigator.pop(context);
+                  }, 
+                  title: "Done"
+                )
+              ],
+            )
+          ],
+        );
+      }
     );
   }
 }

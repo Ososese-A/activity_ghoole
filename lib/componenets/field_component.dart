@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
 
-Widget nameFieldComponent ({required TextEditingController controller}) {
+Widget nameFieldComponent ({required TextEditingController controller, String? title}) {
   return SizedBox(
     width: double.infinity,
     child: TextFormField(
@@ -13,7 +13,7 @@ Widget nameFieldComponent ({required TextEditingController controller}) {
       ),
       decoration: InputDecoration(
         contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-        hintText: "Activity Name",
+        hintText: title ?? "Activity Name",
         hintStyle: TextStyle(
           color: AppColors.secWhite
         ),
@@ -42,6 +42,7 @@ Widget durationFieldComponent ({required TextEditingController controller, requi
     ),
     // width: MediaQuery.of(context).size.width - 28,
     child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           flex: 2,
@@ -64,13 +65,18 @@ Widget durationFieldComponent ({required TextEditingController controller, requi
           ),
         ),
     
-        const SizedBox(width: 8.0,),
+        // const SizedBox(width: 8.0,),
     
         Expanded(
           flex: 1,
           child: DropdownButtonFormField<String>(
             dropdownColor: AppColors.secBrown,
-            icon: SvgPicture.asset("assets/icons/down_w.svg"),
+            icon:
+            SvgPicture.asset(
+              "assets/icons/down_w.svg",
+              height: 5.6,
+              width: 5.6,
+            ),
             value: unit,
             items: units.map((u) {
               return DropdownMenuItem(

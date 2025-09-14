@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_ghoole/componenets/activity_component.dart';
 import 'package:project_ghoole/componenets/btn_component.dart';
 import 'package:project_ghoole/componenets/current_activity_component.dart';
+import 'package:project_ghoole/componenets/field_component.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
 
 class MainScreen extends StatefulWidget {
@@ -36,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         actionsPadding: EdgeInsets.only(right: 14.0),
         actions: [
-          SvgPicture.asset("assets/icons/more.svg")
+          _moreOptions()
         ],
       ),
       body: 
@@ -186,6 +187,131 @@ class _MainScreenState extends State<MainScreen> {
 
         activityComponent()
       ],
+    );
+  }
+
+  Widget _moreOptions () {
+    return GestureDetector(
+      child: SvgPicture.asset("assets/icons/more.svg"),
+      onTapDown: (TapDownDetails details) {
+        showMenu(
+          elevation: 0.0,
+          color: AppColors.priWhite,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              width: 1.0,
+              color: AppColors.priBrown
+            ),
+            borderRadius: BorderRadius.circular(8.0)
+          ),
+          context: context, 
+          position: RelativeRect.fromLTRB(
+            details.globalPosition.dx,
+            details.globalPosition.dy,
+            details.globalPosition.dx,
+            details.globalPosition.dy
+          ),
+          items: [
+            PopupMenuItem(
+              value: 0,
+              child: Text(
+                "Add Activity",
+                style: TextStyle(
+                  color: AppColors.priBrown,
+                  fontSize: 14.0
+                ),
+              ),
+            ),
+            PopupMenuItem(
+              value: 1,
+              child: Text(
+                "Set Work Time",
+                style: TextStyle(
+                  color: AppColors.priBrown,
+                  fontSize: 14.0
+                ),
+              ),
+            ),
+            PopupMenuItem(
+              value: 2,
+              child: Text(
+                "Use Work Times",
+                style: TextStyle(
+                  color: AppColors.priBrown,
+                  fontSize: 14.0
+                ),
+              ),
+            ),
+          ]
+        ).then((selected) {
+          if (selected != null) {
+            if (selected == 0) {
+            } else if (selected == 1) {
+              _showWorkTimeDialog();
+            } else {
+            }
+          }
+        });
+      }
+    );
+  }
+
+  void _showWorkTimeDialog () {
+    final TextEditingController startController = TextEditingController();
+    final TextEditingController endController = TextEditingController();
+
+    showDialog(
+      context: context, 
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColors.priWhite,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(8.0)
+          ),
+          content: Container(
+            width: 400.0,
+            height: 232.0,
+            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 24.0),
+            child: Column(
+              children: [
+                nameFieldComponent(
+                  controller: startController,
+                  title: "Start Work Time"
+                ),
+                SizedBox(height: 32.0,),
+                nameFieldComponent(
+                  controller: endController,
+                  title: "End Work Time"
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                txtBtnComponent(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  title: "Cancel"
+                ),
+                
+                btnComponent(
+                  onPressed: () {
+                    String start = startController.text;
+                    String end = endController.text;
+
+                    debugPrint("This is the start $start and this is the end $end");
+                    Navigator.pop(context);
+                  },
+                  title: "Done"
+                ),
+              ],
+            )
+          ],
+        );
+      }
     );
   }
 }
