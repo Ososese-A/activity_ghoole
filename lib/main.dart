@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:project_ghoole/providers/activity_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:project_ghoole/screens/activity_details_screen.dart';
 import 'package:project_ghoole/screens/main_screen.dart';
 import 'package:project_ghoole/screens/my_activities_screen.dart';
 import 'package:project_ghoole/screens/new_activities_screen.dart';
 
 void main() {
-  runApp(const Ghoole());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ActivityProvider())
+      ],
+      child: const Ghoole(),
+    )
+  );
 }
 
 class Ghoole extends StatelessWidget {
