@@ -33,7 +33,7 @@ Widget nameFieldComponent ({required TextEditingController controller, String? t
   );
 }
 
-Widget durationFieldComponent ({required TextEditingController controller, required String unit, required List<String> units, required ValueChanged<String?>? onChanged, String? title}) {
+Widget durationFieldComponent ({required TextEditingController controller, required String unit, required List<String> units, required ValueChanged<String?>? onChanged}) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
     decoration: BoxDecoration(
@@ -54,7 +54,7 @@ Widget durationFieldComponent ({required TextEditingController controller, requi
             ),
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              hintText: title ?? "Activity Duration",
+              hintText: "Activity Duration",
               hintStyle: TextStyle(
                 color: AppColors.secWhite
               ),
@@ -65,10 +65,8 @@ Widget durationFieldComponent ({required TextEditingController controller, requi
           ),
         ),
     
-        // const SizedBox(width: 8.0,),
-        if (title == null)
-        SizedBox.shrink()
-        else
+        const SizedBox(width: 8.0,),
+        
         Expanded(
           flex: 1,
           child: DropdownButtonFormField<String>(

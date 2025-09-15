@@ -5,6 +5,8 @@ import 'package:project_ghoole/componenets/activity_component.dart';
 import 'package:project_ghoole/componenets/btn_component.dart';
 import 'package:project_ghoole/componenets/current_activity_component.dart';
 import 'package:project_ghoole/componenets/field_component.dart';
+import 'package:project_ghoole/componenets/loading_component.dart';
+import 'package:project_ghoole/componenets/snack_component.dart';
 import 'package:project_ghoole/models/activity.dart';
 import 'package:project_ghoole/providers/activity_provider.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
@@ -40,6 +42,25 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  int getMinutesFromActivity ({required String activityDuration}) {
+    final parts = activityDuration.trim().split(" ");
+
+    if (parts.length < 2) return -1;
+
+    final value = int.tryParse(parts[0]);
+    final unit = parts[1].toLowerCase();
+
+    if (value == null) return -1;
+    
+    if (unit.contains("hour")) {
+      return value * 60;
+    } else if (unit.contains("min")) {
+      return value;
+    }
+
+    return -1;
+  }
+
   bool queueToggle = false;
   bool completedToggle = true;
 
@@ -70,9 +91,10 @@ class _MainScreenState extends State<MainScreen> {
     return Consumer<ActivityProvider>(
       builder: (context, provider, _) {
         if (provider.isLoading) {
+        // if (true) {
           return Scaffold(
             backgroundColor: AppColors.secWhite,
-            body: Center(child: CircularProgressIndicator(),),
+            body: loadingComponent()
           );
         }
 
@@ -80,35 +102,37 @@ class _MainScreenState extends State<MainScreen> {
 
         final activities = provider.activities;
 
-        final futureActivities = activities.where((activity) {
-          final int h = getHourFromActivity(activityHour: activity.time);
-          // debugPrint("This is the activity hour $h and the current hour ${DateTime.now().hour}");
-          return h > DateTime.now().hour;
-        }).toList();
-
-        final currentActivity = activities.firstWhere(
-          (activity) {
-            final int h = getHourFromActivity(activityHour: activity.time);
-            // debugPrint("This is the activity hour $h and the current hour ${DateTime.now().hour}");
-            return h == DateTime.now().hour;
-          },
-          orElse: () => Activity(
-            id: "none", 
-            name: "none", 
-            duration: "", 
-            time: "", 
-            details: "", 
-            tag: "",
-            added: "",
-            updated: ""
-          ),
+        List<Activity> futureActivities = [];
+        List<Activity> completedActivities = [];
+        Activity currentActivity = Activity(
+          id: "none", 
+          name: "none", 
+          duration: "", 
+          time: "", 
+          details: "", 
+          tag: "", 
+          added: "", 
+          updated: ""
         );
+        final now = DateTime.now();
 
-        final completedActivities = activities.where((activity) {
+        for (final activity in activities) {
           final int h = getHourFromActivity(activityHour: activity.time);
-          // debugPrint("This is the activity hour $h and the current hour ${DateTime.now().hour}");
-          return h < DateTime.now().hour;
-        }).toList();
+          final int m = getMinutesFromActivity(activityDuration: activity.duration);
+
+          if (h == -1 || m == -1) continue;
+
+          final startTime = DateTime(now.year, now.month, now.day, h);
+          final endTime = startTime.add(Duration(minutes: m));
+
+          if (now.isBefore(startTime)) {
+            futureActivities.add(activity);
+          } else if (now.isAfter(endTime)) {
+            completedActivities.add(activity);
+          } else if (now.isAfter(startTime) && now.isBefore(endTime)) {
+            currentActivity = activity;
+          }
+        }
 
         return Scaffold(
           backgroundColor: AppColors.secWhite,
@@ -384,6 +408,9 @@ class _MainScreenState extends State<MainScreen> {
               _showWorkTimeDialog();
             } else if (selected == 2) {
               provider.setActivityTime(timeBool: !timeToUse);
+              ScaffoldMessenger.of(context).showSnackBar(
+                snackComponent(title: timeToUse ? "Switched to Work Time" : "Switched to Activity Time")
+              );
             } else {
               Navigator.pushNamed(context, '/activities');
             }
@@ -486,11 +513,11 @@ class _MainScreenState extends State<MainScreen> {
 
                     if (wasSuccessful) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Work time config successful")),
+                        snackComponent(title: "Work time config successful")
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Work time config unsuccessful")),
+                        snackComponent(title: "Work time config unsuccessful")
                       );
                     }
 
@@ -515,11 +542,24 @@ class _MainScreenState extends State<MainScreen> {
       child: Column(
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SvgPicture.asset("assets/icons/calendar.svg"),
-              SizedBox(width: 16.0,),
+              Row(
+                children: [
+                  SvgPicture.asset("assets/icons/calendar.svg"),
+                  SizedBox(width: 8.0,),
+                  Text(
+                    "${getDisplayDate()} ",
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500
+                    ),
+                  )
+                ],
+              ),
+
               Text(
-                "${getDisplayDate()} ${provider.startTime}",
+                "[${provider.startTime} - ${provider.endTime}]",
                 style: TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w500

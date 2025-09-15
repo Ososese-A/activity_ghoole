@@ -63,6 +63,35 @@ class ActivityService {
     }
   }
 
+  Future<bool> updateActivities({required List<ActivityUpdatePayload> updates}) async {
+    bool success = false;
+
+    try {
+      for (final payload in updates) {
+        final activity = await fetchActivity(activityId: payload.activityId);
+
+        if (activity != null) {
+          if (payload.name != null) activity.name = payload.name!;
+          if (payload.duration != null) activity.duration = payload.duration!;
+          if (payload.time != null) activity.time = payload.time!;
+          if (payload.details != null) activity.details = payload.details!;
+          if (payload.updated != null) activity.updated = payload.updated!;
+
+          await activity.save();
+        }
+
+        // else {
+        //   debugPrint("Activity with ID ${payload.activityId} not found.");
+        // }
+      }
+      success = true;
+      return success;
+    } catch (e) {
+      success = false;
+      return success;
+    }
+  }
+
   Future<bool> updateActivityRecord ({required String activityId, required String activityUpdate}) async {
     bool success = false;
 
@@ -83,6 +112,47 @@ class ActivityService {
     }
   }
 
+  Future<bool> updateActivitiesRecord ({required List<ActivityRecordUpdatePayload> updates }) async {
+    bool success = false;
+
+    try {
+      for (final payload in updates) {
+        final activity = await fetchActivity(activityId: payload.activityId);
+
+        if (activity != null ) {
+          activity.activityRecord = [...?activity.activityRecord, payload.update];
+
+          await activity.save();
+        }
+        // else {
+        //   debugPrint("Activity with ID ${payload.activityId} not found.");
+        //   success = false;
+        // }
+      }
+
+      success = true;
+      return success;
+    } catch (e) {
+      return success;
+    }
+  }
+
+  Future<bool> reaggangeList ({required List<Activity> reorderedList}) async {
+    bool success = false;
+    try {
+      await box.clear();
+      for (final activity in reorderedList) {
+        await storeActivity(activity: activity);
+      }
+
+      success = true;
+      return success;
+    } catch (e) {
+      success = false;
+      return success;
+    }
+  }
+
   Future<bool> deleteActivity({required String activityId}) async {
     bool success = false;
 
@@ -99,5 +169,38 @@ class ActivityService {
     } catch (e) {
       return success;
     }
+  }
+
+  Future<bool> deleteActivities ({required List<String> activityIds}) async {
+   bool success = true;
+
+   try {
+    for (final id in activityIds) {
+      final activity = box.values.firstWhere(
+        (a) => a.id == id,
+        orElse: () => Activity(
+          id: '', 
+          name: '', 
+          duration: '', 
+          time: '', 
+          details: '', 
+          tag: '', 
+          added: '', 
+          updated: ''
+        ),
+      );
+
+      if (activity.id.isNotEmpty) {
+        await activity.delete();
+      } 
+      // else {
+      //   debugPrint("Activity with ID $id not found");
+      // }
+    }
+   } catch (e) {
+    success = false;
+   }
+
+   return success;
   }
 }

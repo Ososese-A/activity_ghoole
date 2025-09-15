@@ -36,6 +36,10 @@ Widget currentActivityComponent ({required Activity activity, required BuildCont
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
+                constraints: BoxConstraints(
+                  maxHeight: 104.0,
+                  maxWidth: 104.0
+                ),
                 padding: EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
                   border: Border.all(

@@ -44,3 +44,31 @@ class Activity extends HiveObject {
     this.activityRecord
   });
 }
+
+class ActivityUpdatePayload {
+  final String activityId;
+  final String? name;
+  final String? duration;
+  final String? time;
+  final String? details;
+  final String? updated;
+
+  ActivityUpdatePayload({
+    required this.activityId,
+    this.name,
+    this.duration,
+    this.time,
+    this.details,
+    this.updated,
+  });
+}
+
+class ActivityRecordUpdatePayload {
+  final String activityId;
+  final String update;
+
+  ActivityRecordUpdatePayload({
+    required this.activityId,
+    required this.update,
+  });
+}

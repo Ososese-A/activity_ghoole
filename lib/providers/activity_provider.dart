@@ -24,6 +24,13 @@ class ActivityProvider extends ChangeNotifier {
 
   void setActivityTime ({required bool timeBool}) {
     _useWorkTime = timeBool;
+
+    notifyListeners();
+  }
+
+  void setActivities(List<Activity> activities) {
+    _activities = activities;
+    notifyListeners();
   }
 
   Future<void> setWorkTime ({required String startTime, required String endTime}) async {
@@ -124,11 +131,43 @@ class ActivityProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateActivities ({required List<ActivityUpdatePayload> updates}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _wasSuccessful = await _service.updateActivities(updates: updates);
+
+    await loadActivities();
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> updateActivityRecord ({required String activityId, required String activityUpdate}) async {
     _isLoading = true;
     notifyListeners();
 
     _wasSuccessful = await _service.updateActivityRecord(activityId: activityId, activityUpdate: activityUpdate);
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> updateActivitiesRecord ({required List<ActivityRecordUpdatePayload> updates}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _wasSuccessful = await _service.updateActivitiesRecord(updates: updates);
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> reorderActivities ({required List<Activity> activities}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _wasSuccessful = await _service.reaggangeList(reorderedList: activities);
 
     _isLoading = false;
     notifyListeners();
@@ -157,6 +196,18 @@ class ActivityProvider extends ChangeNotifier {
     notifyListeners();
 
     _wasSuccessful = await _service.deleteActivity(activityId: activityId);
+
+    await loadActivities();
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> removeActivies ({required List<String> activityIds}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _wasSuccessful = await _service.deleteActivities(activityIds: activityIds);
 
     await loadActivities();
 

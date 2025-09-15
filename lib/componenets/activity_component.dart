@@ -11,6 +11,7 @@ Widget activityComponent ({
     required String activityTag, 
     required String activityDetails,
     bool isSelectMode = false, 
+    bool isReordertMode = false, 
   }) {
   return GestureDetector(
     onTap: () {
@@ -57,7 +58,7 @@ Widget activityComponent ({
           SizedBox(width: 16.0,),
 
           SizedBox(
-            width: isSelectMode ? 200 : 240.0,
+            width: isSelectMode || isReordertMode ? 200 : 240.0,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,

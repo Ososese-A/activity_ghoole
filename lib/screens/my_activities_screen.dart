@@ -18,15 +18,37 @@ class MyActivitiesScreen extends StatefulWidget {
 class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
   bool isSelectModeOn = false;
 
+  String selectMode = "";
+
+  bool isAllSelected = false;
+
+  List<int> selectedIndicies = [];
+
+  List<Activity> localReorderedList = [];
+
   @override
   void initState() {
     super.initState();
 
     Future.microtask(
       () {
-        Provider.of<ActivityProvider>(context, listen: false).loadActivities();
+        final provider = Provider.of<ActivityProvider>(context, listen: false);
+        provider.loadActivities();
+        
+        if (localReorderedList.isEmpty) {
+          localReorderedList = List<Activity>.from(provider.activities);
+        }
       }
     );
+  }
+
+  void resetValues () {
+    setState(() {
+      selectMode = '';
+      selectedIndicies = [];
+      isSelectModeOn = false;
+      isAllSelected = false;
+    });
   }
 
   @override
@@ -47,6 +69,10 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
           appBar: appBar(
             hasOptions: true, 
             context: context, 
+            isOptionOpen: isSelectModeOn,
+            openOptionAction: () {
+              resetValues();
+            },
             options: [
               Text(
                 "Rearrange Activities",
@@ -57,6 +83,13 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
               ),
               Text(
                 "Add Activity",
+                style: TextStyle(
+                  color: AppColors.priBrown,
+                  fontSize: 14.0
+                ),
+              ),
+              Text(
+                "Mark Completed Activity",
                 style: TextStyle(
                   color: AppColors.priBrown,
                   fontSize: 14.0
@@ -74,8 +107,22 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
               if (value != null) {
                 int i = int.parse(value);
                 if (i == 0) {
+                  setState(() {
+                    selectMode = "reorder";
+                    isSelectModeOn = true;
+                  });
                 } else if (i == 1) {
+                  Navigator.pushNamed(context, "/new");
+                } else if (i == 2) {
+                  setState(() {
+                    isSelectModeOn = true;
+                    selectMode = "mark";
+                  });
                 } else {
+                  setState(() {
+                    isSelectModeOn = true;
+                    selectMode = "delete";
+                  });
                 }
               }
             },
@@ -100,6 +147,54 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
                       ),
                     ),
 
+                    if (selectMode == "reorder")
+                    ReorderableListView.builder(
+                      shrinkWrap: true,
+                      itemCount: localReorderedList.length, 
+                      onReorder: (oldIndex, newIndex) async{
+                        setState(() {
+                          if (newIndex > oldIndex) newIndex -= 1;
+                          final item = localReorderedList.removeAt(oldIndex);
+                          localReorderedList.insert(newIndex, item);
+                        });
+
+                        provider.setActivities(localReorderedList);
+                        await provider.reorderActivities(activities: localReorderedList);
+                      },
+                      itemBuilder: (context, index) {
+                        final activity = localReorderedList[index];
+                        return Padding(
+                          key:  ValueKey(activity.id),
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.drag_handle, color: AppColors.secBrown,),
+                              SizedBox(width: 4.0,),
+                              Container(
+                                alignment: Alignment.center,
+                                constraints: BoxConstraints(
+                                  maxWidth: MediaQuery.of(context).size.width - 56
+                                ),
+                                child: activityComponent(
+                                  context: context,
+                                  activityId: activity.id,
+                                  activityName: activity.name,
+                                  activityDuration: activity.duration,
+                                  activityTime: activity.time,
+                                  activityDetails: activity.details,
+                                  activityTag: activity.tag,
+                                  isSelectMode: false,
+                                  isReordertMode: true
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      },
+                    )
+
+                    else
                     ListView.separated(
                       shrinkWrap: true,
                       itemCount: activities.length,
@@ -107,18 +202,44 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
                         Activity activity = activities[index];
 
                         return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            isSelectModeOn ? SvgPicture.asset("assets/icons/unselect.svg") : SizedBox.shrink(),
-                            isSelectModeOn ? SizedBox(width: 16.0,) : SizedBox.shrink(),
-                            activityComponent(
-                              context: context,
-                              activityId: activity.id,
-                              activityName: activity.name,
-                              activityDuration: activity.duration,
-                              activityTime: activity.time,
-                              activityDetails: activity.details,
-                              activityTag: activity.tag,
-                              isSelectMode: isSelectModeOn,
+                            isSelectModeOn 
+                            ? 
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  if (selectedIndicies.contains(index)) {
+                                    selectedIndicies.remove(index);
+                                  } else {
+                                    selectedIndicies.add(index);
+                                  }
+                                });
+                              },
+                              child: selectedIndicies.contains(index) ? SvgPicture.asset("assets/icons/select.svg") : SvgPicture.asset("assets/icons/unselect.svg")
+                            ) 
+                            : 
+                            SizedBox.shrink(),
+
+                            isSelectModeOn 
+                            ? 
+                            SizedBox(width: 16.0,) 
+                            : 
+                            SizedBox.shrink(),
+                            Container(
+                              alignment: Alignment.center,
+                              child: activityComponent(
+                                context: context,
+                                activityId: activity.id,
+                                activityName: activity.name,
+                                activityDuration: activity.duration,
+                                activityTime: activity.time,
+                                activityDetails: activity.details,
+                                activityTag: activity.tag,
+                                isSelectMode: isSelectModeOn,
+                              ),
                             )
                           ],
                         );
@@ -136,9 +257,52 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          txtBtnComponent(onTap: () {}, title: "Select All"),
-                      
-                          btnComponent(onPressed: () {}, title: "Delete Selected")
+                          if (selectMode == "reorder")
+                          SizedBox.shrink()
+                          else
+                          isAllSelected
+                          ?
+                          txtBtnComponent(
+                            onTap: () {
+                              setState(() {
+                                isAllSelected = false;
+                                selectedIndicies.clear();
+                              });
+                            },
+                            title: "Deselect All"
+                          )
+                          :
+                          txtBtnComponent(onTap: () {
+                            setState(() {
+                              List<int> newIndicies = List.generate(activities.length, (index) => index).where((i) => !selectedIndicies.contains(i)).toList();
+                              selectedIndicies.addAll(newIndicies);
+                              isAllSelected = true;
+                            });
+                          }, title: "Select All"),
+
+                          if (selectMode == "reorder")
+                          btnComponent(onPressed: () {
+                            resetValues();
+
+                            resetValues();
+                          }, title: "Done") 
+
+                          else
+                          selectMode == "mark" 
+                          ? 
+                          btnComponent(onPressed: () async {
+                            final updatePayload = selectedIndicies.map((index) => ActivityRecordUpdatePayload(activityId: activities[index].id, update: DateTime.now().toIso8601String())).toList();
+                            await provider.updateActivitiesRecord(updates: updatePayload);
+
+                            resetValues();
+                          }, title: "Mark As Completed") 
+                          : 
+                          btnComponent(onPressed: () async {
+                            List<String> activityIds = selectedIndicies.map((index) => activities[index].id).toList();
+                            await provider.removeActivies(activityIds: activityIds);
+
+                            resetValues();
+                          }, title: "Delete Selected")
                         ],
                       ),
                     ),

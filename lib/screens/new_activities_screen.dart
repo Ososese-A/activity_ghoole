@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project_ghoole/componenets/app_bar.dart';
 import 'package:project_ghoole/componenets/btn_component.dart';
 import 'package:project_ghoole/componenets/field_component.dart';
+import 'package:project_ghoole/componenets/snack_component.dart';
 import 'package:project_ghoole/models/activity.dart';
 import 'package:project_ghoole/providers/activity_provider.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
@@ -53,6 +54,40 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
   ];
 
   String tagValue = "";
+
+  String validate () {
+    final duration_v = int.tryParse(_durationController.text);
+    final timeInterim = _hourController.text.split(":");
+
+    if (_nameController.text.isEmpty && _durationController.text.isEmpty && _hourController.text.isEmpty && _detailController.text.isEmpty && tagValue.isEmpty) {
+      return "all";
+    } else if (_nameController.text.isEmpty) {
+      return "name";
+    } else if (_durationController.text.isEmpty) {
+      return "duration";
+    } else if (_hourController.text.isEmpty) {
+      return "time";
+    } else if (_detailController.text.isEmpty) {
+      return "details";
+    } else if (tagValue.trim().isEmpty) {
+      return "tag";
+    } else if (duration_v == null || duration_v <= 0) {
+      return "duration_v";
+    } else if (timeInterim.length != 2) {
+      return "time_v";
+    } else if (timeInterim.length == 2) {
+      final hour = int.tryParse(timeInterim[0]);
+      final minute = int.tryParse(timeInterim[1]);
+
+      if (hour == null || hour < 0 || hour > 23 || minute == null || minute < 0 || minute > 59) {
+        return "time_v";
+      } else {
+        return "";
+      }
+    } else {
+      return "";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +169,7 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                                 ),
                               ),
               
-                              SizedBox(height: 16.0,),
+                              SizedBox(height: 8.0,),
               
                               Row(
                                 children: [
@@ -150,7 +185,7 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                                       }
                                     }
                                   ),
-                                  SizedBox(width: 16.0,),
+                                  SizedBox(width: 8.0,),
                                   tagBtnComponent(
                                     title: "Coding", 
                                     icon: tagValue == "code" ? "assets/icons/code_w.svg" : "assets/icons/code.svg",
@@ -166,7 +201,7 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                                 ],
                               ),
               
-                              SizedBox(height: 16.0,),
+                              SizedBox(height: 8.0,),
               
                               Row(
                                 children: [
@@ -182,7 +217,7 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                                       }
                                     }
                                   ),
-                                  SizedBox(width: 16.0,),
+                                  SizedBox(width: 8.0,),
                                   tagBtnComponent(
                                     title: "House", 
                                     icon: tagValue == "home" ? "assets/icons/home_w.svg" : "assets/icons/home.svg",
@@ -198,7 +233,7 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                                 ],
                               ),
               
-                              SizedBox(height: 16.0,),
+                              SizedBox(height: 8.0,),
               
                               Row(
                                 children: [
@@ -214,7 +249,7 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                                       }
                                     }
                                   ),
-                                  SizedBox(width: 16.0,),
+                                  SizedBox(width: 8.0,),
                                   tagBtnComponent(
                                     title: "Finance", 
                                     icon: tagValue == "finance" ? "assets/icons/finance_w.svg" : "assets/icons/finance.svg",
@@ -230,7 +265,7 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                                 ],
                               ),
               
-                              SizedBox(height: 16.0,),
+                              SizedBox(height: 8.0,),
               
                               Row(
                                 children: [
@@ -246,7 +281,7 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                                       }
                                     }
                                   ),
-                                  SizedBox(width: 16.0,),
+                                  SizedBox(width: 8.0,),
                                   tagBtnComponent(
                                     title: "Miscellneous", 
                                     icon: tagValue == "misc" ? "assets/icons/misc_w.svg" : "assets/icons/misc.svg",
@@ -279,28 +314,67 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                     btnComponent(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          final id = DateTime.now().millisecondsSinceEpoch.toString();
+                          final validationValue = validate();
 
-                          final activity = Activity(
-                            id: id, 
-                            name: _nameController.text.trim(), 
-                            duration: "${_durationController.text.trim()} $_durationUnit", 
-                            time: _hourController.text.trim(), 
-                            details: _detailController.text.trim(),
-                            tag: tagValue,
-                            added: DateTime.now().toIso8601String().split("T").first,
-                            updated: DateTime.now().toIso8601String().split("T").first,
-                          );
-
-                          final provider = Provider.of<ActivityProvider>(context, listen: false);
-                          await provider.addActivity(activity: activity);
-
-                          if (provider.wasSuccessful == true) {
-                            Navigator.pop(context);
+                          if (validationValue.isNotEmpty) {
+                            switch (validationValue) {
+                              case "all":
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  snackComponent(title: "Fields cannot be empty")
+                                );
+                              case "name":
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  snackComponent(title: "Activity name field cannot be empty")
+                                );
+                              case "duration":
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  snackComponent(title: "Activity duration field cannot be empty")
+                                );
+                              case "time":
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  snackComponent(title: "Activity time field cannot be empty")
+                                );
+                              case "details":
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  snackComponent(title: "Activity details field cannot be empty")
+                                );
+                              case "tag":
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  snackComponent(title: "An activity tag must be selected")
+                                );
+                              case "duration_v":
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  snackComponent(title: "Invalid Duration!")
+                                );
+                              case "time_v":
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  snackComponent(title: "Inavlid Time!")
+                                );
+                            }
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Failed to add activity"))
+                            final id = DateTime.now().millisecondsSinceEpoch.toString();
+
+                            final activity = Activity(
+                              id: id, 
+                              name: _nameController.text.trim(), 
+                              duration: "${_durationController.text.trim()} $_durationUnit", 
+                              time: _hourController.text.trim(), 
+                              details: _detailController.text.trim(),
+                              tag: tagValue,
+                              added: DateTime.now().toIso8601String().split("T").first,
+                              updated: DateTime.now().toIso8601String().split("T").first,
                             );
+
+                            final provider = Provider.of<ActivityProvider>(context, listen: false);
+                            await provider.addActivity(activity: activity);
+
+                            if (provider.wasSuccessful == true) {
+                              Navigator.pop(context);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Failed to add activity"))
+                              );
+                            }
                           }
                         }
                       }, 

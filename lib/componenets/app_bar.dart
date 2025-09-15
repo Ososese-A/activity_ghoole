@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
 
-PreferredSizeWidget appBar ({required bool hasOptions, List<Widget>? options, required BuildContext context, ValueChanged<String?>? onChange }) {
+PreferredSizeWidget appBar ({required bool hasOptions, List<Widget>? options, required BuildContext context, ValueChanged<String?>? onChange, bool isOptionOpen = false, VoidCallback? openOptionAction}) {
   return AppBar(
     backgroundColor: AppColors.secWhite,
     leading: Padding(
@@ -16,6 +16,12 @@ PreferredSizeWidget appBar ({required bool hasOptions, List<Widget>? options, re
     ),
     actionsPadding: EdgeInsets.only(right: 14.0),
     actions: [
+      if (isOptionOpen)
+      GestureDetector(
+        onTap: openOptionAction ?? () {},
+        child: SvgPicture.asset("assets/icons/cancel.svg"),
+      )
+      else
       hasOptions 
       ? 
       GestureDetector(

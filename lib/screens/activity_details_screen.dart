@@ -3,6 +3,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:project_ghoole/componenets/app_bar.dart';
 import 'package:project_ghoole/componenets/btn_component.dart';
 import 'package:project_ghoole/componenets/field_component.dart';
+import 'package:project_ghoole/componenets/loading_component.dart';
+import 'package:project_ghoole/componenets/snack_component.dart';
 import 'package:project_ghoole/componenets/test_calendar_component.dart';
 import 'package:project_ghoole/providers/activity_provider.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
@@ -23,11 +25,6 @@ class ActivityDetailsScreen extends StatefulWidget {
 }
 
 class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
-  final List<DateTime> months = [
-    DateTime(2025, 9),
-    DateTime(2025, 8),
-    DateTime(2025, 7),
-  ];
 
   @override
   void initState() {
@@ -47,7 +44,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
         if (provider.activity == null || provider.isLoading) {
           return Scaffold(
             backgroundColor: AppColors.secWhite,
-            body: Center(child: CircularProgressIndicator(),),
+            body: loadingComponent(),
           );
         }
 
@@ -175,7 +172,7 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                               await provider.markActivityAsIncomplete(activityId: activity.id);
 
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("Activity marked as Ongoing")),
+                                  snackComponent(title: "Activity marked as Ongoing")
                                 );
                             }, 
                             title: "Ongoing", 
@@ -191,11 +188,11 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
 
                               if (provider.wasSuccessful!) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("Activity marked as completed")),
+                                  snackComponent(title: "Activity marked as completed")
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("Failed to update activity")),
+                                  snackComponent(title: "Failed to update activity")
                                 );
                               }
                             }, 
@@ -313,7 +310,49 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
     '21:00',
     '22:00',
     '23:00',
+    '',
+    '',
+    '',
+    '',
   ];
+
+
+  String validate () {
+    final duration_v = int.tryParse(durationController.text);
+    final timeInterim = hourController.text.split(":");
+
+    // if (nameController.text.isEmpty && durationController.text.isEmpty && hourController.text.isEmpty && detailController.text.isEmpty && tagValue.isEmpty) {
+    if (nameController.text.isEmpty && durationController.text.isEmpty && hourController.text.isEmpty && detailController.text.isEmpty) {
+      return "all";
+    } else if (nameController.text.isEmpty) {
+      return "name";
+    } else if (durationController.text.isEmpty) {
+      return "duration";
+    } else if (hourController.text.isEmpty) {
+      return "time";
+    } else if (detailController.text.isEmpty) {
+      return "details";
+    } 
+    // else if (tagValue.trim().isEmpty) {
+    //   return "tag";
+    // } 
+    else if (duration_v == null || duration_v <= 0) {
+      return "duration_v";
+    } else if (timeInterim.length != 2) {
+      return "time_v";
+    } else if (timeInterim.length == 2) {
+      final hour = int.tryParse(timeInterim[0]);
+      final minute = int.tryParse(timeInterim[1]);
+
+      if (hour == null || hour < 0 || hour > 23 || minute == null || minute < 0 || minute > 59) {
+        return "time_v";
+      } else {
+        return "";
+      }
+    } else {
+      return "";
+    }
+  }
 
     showDialog(
       context: context, 
@@ -379,24 +418,63 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                 ),
                 btnComponent(
                   onPressed: () async {
-                    String activity = nameController.text;
-                    String duration = "${durationController.text} $durationUnit";
-                    String time = hourController.text;
-                    String details = detailController.text;
+                    final validationValue = validate();
 
-                    debugPrint("This is the activity: $activity, this is the duration $duration $durationUnit, this is the time $time");
-                    debugPrint("This is the details: $details");
+                    if (validationValue.isNotEmpty) {
+                      switch (validationValue) {
+                        case "all":
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            snackComponent(title: "Fields cannot be empty")
+                          );
+                        case "name":
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            snackComponent(title: "Activity name field cannot be empty")
+                          );
+                        case "duration":
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            snackComponent(title: "Activity duration field cannot be empty")
+                          );
+                        case "time":
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            snackComponent(title: "Activity time field cannot be empty")
+                          );
+                        case "details":
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            snackComponent(title: "Activity details field cannot be empty")
+                          );
+                        // case "tag":
+                        //   ScaffoldMessenger.of(context).showSnackBar(
+                        //     snackComponent(title: "An activity tag must be selected")
+                        //   );
+                        case "duration_v":
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            snackComponent(title: "Invalid Duration!")
+                          );
+                        case "time_v":
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            snackComponent(title: "Inavlid Time!")
+                          );
+                      }
+                    } else {
+                      String activity = nameController.text;
+                      String duration = "${durationController.text} $durationUnit";
+                      String time = hourController.text;
+                      String details = detailController.text;
 
-                    await Provider.of<ActivityProvider>(context, listen: false).updateActivity(
-                      activityId: activityId, 
-                      activityName: activity, 
-                      activityDuration: duration, 
-                      activityTime: time, 
-                      activityDetails: details,
-                      updated: DateTime.now().toIso8601String().split("T").first
-                    );
+                      debugPrint("This is the activity: $activity, this is the duration $duration $durationUnit, this is the time $time");
+                      debugPrint("This is the details: $details");
 
-                    Navigator.pop(context);
+                      await Provider.of<ActivityProvider>(context, listen: false).updateActivity(
+                        activityId: activityId, 
+                        activityName: activity, 
+                        activityDuration: duration, 
+                        activityTime: time, 
+                        activityDetails: details,
+                        updated: DateTime.now().toIso8601String().split("T").first
+                      );
+
+                      Navigator.pop(context);
+                    }
                   }, 
                   title: "Done"
                 )
