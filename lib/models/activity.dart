@@ -1,6 +1,8 @@
 
 import 'package:hive/hive.dart';
 
+part 'activity.g.dart';
+
 @HiveType(typeId: 0)
 class Activity extends HiveObject {
   @HiveField(0)
@@ -21,6 +23,15 @@ class Activity extends HiveObject {
   @HiveField(5)
   String tag;
 
+  @HiveField(6)
+  String added;
+
+  @HiveField(7)
+  String updated;
+
+  @HiveField(8)
+  List<String>? activityRecord;
+
   Activity({
     required this.id,
     required this.name,
@@ -28,5 +39,8 @@ class Activity extends HiveObject {
     required this.time,
     required this.details,
     required this.tag,
+    required this.added,
+    required this.updated,
+    this.activityRecord
   });
 }

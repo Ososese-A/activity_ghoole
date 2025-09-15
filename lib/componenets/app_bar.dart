@@ -7,8 +7,11 @@ PreferredSizeWidget appBar ({required bool hasOptions, List<Widget>? options, re
     backgroundColor: AppColors.secWhite,
     leading: Padding(
       padding: const EdgeInsets.all(14.0),
-      child: SvgPicture.asset(
-        "assets/icons/back.svg",
+      child: GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: SvgPicture.asset(
+          "assets/icons/back.svg",
+        ),
       ),
     ),
     actionsPadding: EdgeInsets.only(right: 14.0),

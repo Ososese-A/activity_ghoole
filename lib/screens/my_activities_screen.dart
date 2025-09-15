@@ -3,7 +3,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_ghoole/componenets/activity_component.dart';
 import 'package:project_ghoole/componenets/app_bar.dart';
 import 'package:project_ghoole/componenets/btn_component.dart';
+import 'package:project_ghoole/models/activity.dart';
+import 'package:project_ghoole/providers/activity_provider.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
+import 'package:provider/provider.dart';
 
 class MyActivitiesScreen extends StatefulWidget {
   const MyActivitiesScreen({super.key});
@@ -16,129 +19,139 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
   bool isSelectModeOn = false;
 
   @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(
+      () {
+        Provider.of<ActivityProvider>(context, listen: false).loadActivities();
+      }
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.secWhite,
-      appBar: appBar(
-        hasOptions: true, 
-        context: context, 
-        options: [
-          Text(
-            "Rearrange Activities",
-            style: TextStyle(
-              color: AppColors.priBrown,
-              fontSize: 14.0
-            ),
+    return Consumer<ActivityProvider>(
+      builder: (context, provider, _) {
+        if (provider.isLoading) {
+          return Scaffold(
+            backgroundColor: AppColors.secWhite,
+            body: Center(child: CircularProgressIndicator(),),
+          );
+        }
+
+        final activities = provider.activities;
+
+        return Scaffold(
+          backgroundColor: AppColors.secWhite,
+          appBar: appBar(
+            hasOptions: true, 
+            context: context, 
+            options: [
+              Text(
+                "Rearrange Activities",
+                style: TextStyle(
+                  color: AppColors.priBrown,
+                  fontSize: 14.0
+                ),
+              ),
+              Text(
+                "Add Activity",
+                style: TextStyle(
+                  color: AppColors.priBrown,
+                  fontSize: 14.0
+                ),
+              ),
+              Text(
+                "Remove Activity",
+                style: TextStyle(
+                  color: AppColors.priBrown,
+                  fontSize: 14.0
+                ),
+              ),
+            ],
+            onChange: (value) {
+              if (value != null) {
+                int i = int.parse(value);
+                if (i == 0) {
+                } else if (i == 1) {
+                } else {
+                }
+              }
+            },
           ),
-          Text(
-            "Add Activity",
-            style: TextStyle(
-              color: AppColors.priBrown,
-              fontSize: 14.0
-            ),
-          ),
-          Text(
-            "Remove Activity",
-            style: TextStyle(
-              color: AppColors.priBrown,
-              fontSize: 14.0
-            ),
-          ),
-        ],
-        onChange: (value) {
-          if (value != null) {
-            int i = int.parse(value);
-            if (i == 0) {
-            } else if (i == 1) {
-            } else {
-            }
-          }
-        },
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14.0),
-        child: Stack(
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14.0),
+            child: Stack(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 24.0),
-                  child: Text(
-                    "My Activities",
-                    style: TextStyle(
-                      color: AppColors.secBrown,
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.w500
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, bottom: 24.0),
+                      child: Text(
+                        "My Activities",
+                        style: TextStyle(
+                          color: AppColors.secBrown,
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.w500
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-            
-                Row(
-                  children: [
-                    isSelectModeOn ? SvgPicture.asset("assets/icons/unselect.svg") : SizedBox.shrink(),
-                    isSelectModeOn ? SizedBox(width: 16.0,) : SizedBox.shrink(),
-                    activityComponent(
-                      isSelectMode: isSelectModeOn
-                    )
+
+                    ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: activities.length,
+                      itemBuilder: (context, index) {
+                        Activity activity = activities[index];
+
+                        return Row(
+                          children: [
+                            isSelectModeOn ? SvgPicture.asset("assets/icons/unselect.svg") : SizedBox.shrink(),
+                            isSelectModeOn ? SizedBox(width: 16.0,) : SizedBox.shrink(),
+                            activityComponent(
+                              context: context,
+                              activityId: activity.id,
+                              activityName: activity.name,
+                              activityDuration: activity.duration,
+                              activityTime: activity.time,
+                              activityDetails: activity.details,
+                              activityTag: activity.tag,
+                              isSelectMode: isSelectModeOn,
+                            )
+                          ],
+                        );
+                      }, 
+                      separatorBuilder: (context, index) => SizedBox(height: 16.0,)
+                    ),
                   ],
                 ),
-                SizedBox(height: 16.0,),
-                Row(
-                  children: [
-                    isSelectModeOn ? SvgPicture.asset("assets/icons/unselect.svg") : SizedBox.shrink(),
-                    isSelectModeOn ? SizedBox(width: 16.0,) : SizedBox.shrink(),
-                    activityComponent(
-                      isSelectMode: isSelectModeOn
-                    )
-                  ],
-                ),
-                SizedBox(height: 16.0,),
-                Row(
-                  children: [
-                    isSelectModeOn ? SvgPicture.asset("assets/icons/unselect.svg") : SizedBox.shrink(),
-                    isSelectModeOn ? SizedBox(width: 16.0,) : SizedBox.shrink(),
-                    activityComponent(
-                      isSelectMode: isSelectModeOn
-                    )
-                  ],
-                ),
-                SizedBox(height: 16.0,),
-                Row(
-                  children: [
-                    isSelectModeOn ? SvgPicture.asset("assets/icons/unselect.svg") : SizedBox.shrink(),
-                    isSelectModeOn ? SizedBox(width: 16.0,) : SizedBox.shrink(),
-                    activityComponent(
-                      isSelectMode: isSelectModeOn
-                    )
-                  ],
-                ),
+
+                if (isSelectModeOn)
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          txtBtnComponent(onTap: () {}, title: "Select All"),
+                      
+                          btnComponent(onPressed: () {}, title: "Delete Selected")
+                        ],
+                      ),
+                    ),
+                  )
+
+                else 
+
+                  SizedBox.shrink()
               ],
             ),
-
-            if (isSelectModeOn)
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      txtBtnComponent(onTap: () {}, title: "Select All"),
-                  
-                      btnComponent(onPressed: () {}, title: "Delete Selected")
-                    ],
-                  ),
-                ),
-              )
-
-            else 
-
-              SizedBox.shrink()
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

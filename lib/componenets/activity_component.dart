@@ -2,8 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
 
-Widget activityComponent ({bool isSelectMode = false}) {
+Widget activityComponent ({
+    required BuildContext context,
+    required String activityId, 
+    required String activityName, 
+    required String activityDuration, 
+    required String activityTime, 
+    required String activityTag, 
+    required String activityDetails,
+    bool isSelectMode = false, 
+  }) {
   return GestureDetector(
+    onTap: () {
+      Navigator.pushNamed(context, '/details', arguments: {
+        'id': activityId,
+        'options': true
+      });
+    },
     child: Container(
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -25,10 +40,16 @@ Widget activityComponent ({bool isSelectMode = false}) {
               ),
               borderRadius: BorderRadius.circular(360.0)
             ),
-            child: SvgPicture.asset(
-              "assets/icons/design.svg",
-              height: 48.0,
-              width: 48.0,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: 40.0,
+                maxWidth: 40.0
+              ),
+              child: SvgPicture.asset(
+                activityTag != "" ? "assets/icons/$activityTag.svg" : "assets/icons/code.svg",
+                height: 48.0,
+                width: 48.0,
+              ),
             ),
           ),
 
@@ -42,7 +63,7 @@ Widget activityComponent ({bool isSelectMode = false}) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Figma (components & design)",
+                  activityName,
                   style: TextStyle(
                     color: AppColors.secBrown,
                     fontSize: 16.0,
@@ -57,7 +78,7 @@ Widget activityComponent ({bool isSelectMode = false}) {
                     SvgPicture.asset("assets/icons/time.svg"),
                     SizedBox(width: 16.0,),
                     Text(
-                      "12:00 pm",
+                      activityTime,
                       style: TextStyle(
                         color: AppColors.secBrown
                       ),
@@ -72,7 +93,7 @@ Widget activityComponent ({bool isSelectMode = false}) {
                     SvgPicture.asset("assets/icons/duration.svg"),
                     SizedBox(width: 16.0,),
                     Text(
-                      "30 minutes",
+                      activityDuration,
                       style: TextStyle(
                         color: AppColors.secBrown
                       ),

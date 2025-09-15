@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:project_ghoole/componenets/app_bar.dart';
 import 'package:project_ghoole/componenets/btn_component.dart';
 import 'package:project_ghoole/componenets/field_component.dart';
+import 'package:project_ghoole/models/activity.dart';
+import 'package:project_ghoole/providers/activity_provider.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
+import 'package:provider/provider.dart';
 
 class NewActivitiesScreen extends StatefulWidget {
   const NewActivitiesScreen({super.key});
@@ -23,7 +26,30 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
   final List<String> _durationUnits = ['minutes', 'hours'];
 
   final List<String> _hourOptions = [
-    '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'
+    '00:00', 
+    '01:00', 
+    '02:00', 
+    '03:00', 
+    '04:00', 
+    '05:00', 
+    '06:00', 
+    '07:00', 
+    '08:00', 
+    '09:00', 
+    '10:00', 
+    '11:00', 
+    '12:00',
+    '13:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00',
+    '18:00',
+    '19:00',
+    '20:00',
+    '21:00',
+    '22:00',
+    '23:00',
   ];
 
   String tagValue = "";
@@ -251,12 +277,32 @@ class _NewActivitiesScreenState extends State<NewActivitiesScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     btnComponent(
-                      onPressed: () {
-                        debugPrint("Activity Name: ${_nameController.text}");
-                        debugPrint("Activity Details: ${_detailController.text}");
-                        debugPrint("Activity Duration: ${_durationController.text} $_durationUnit");
-                        debugPrint("Activity Hour: ${_hourController.text}");
-                        debugPrint("Activity Tag: $tagValue");
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          final id = DateTime.now().millisecondsSinceEpoch.toString();
+
+                          final activity = Activity(
+                            id: id, 
+                            name: _nameController.text.trim(), 
+                            duration: "${_durationController.text.trim()} $_durationUnit", 
+                            time: _hourController.text.trim(), 
+                            details: _detailController.text.trim(),
+                            tag: tagValue,
+                            added: DateTime.now().toIso8601String().split("T").first,
+                            updated: DateTime.now().toIso8601String().split("T").first,
+                          );
+
+                          final provider = Provider.of<ActivityProvider>(context, listen: false);
+                          await provider.addActivity(activity: activity);
+
+                          if (provider.wasSuccessful == true) {
+                            Navigator.pop(context);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Failed to add activity"))
+                            );
+                          }
+                        }
                       }, 
                       title: "Add Activity"
                     )

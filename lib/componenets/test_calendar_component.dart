@@ -2,18 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
 
-Widget calendarBuilder () {
-  DateTime month = DateTime(2025, 6);
+Widget calendarBuilder ({required String startDate, required List<String>? completedRecords}) {
+  DateTime month = DateTime.parse(startDate);
+  // DateTime month = DateTime.parse("2025-07-01");
 
-  List<String> completedDates = [
-    '2025-09-02',
-    '2025-09-05',
-    '2025-09-07',
-    '2025-09-11',
-    '2025-08-22',
-    '2025-08-17',
-    '2025-07-01'
-  ];
+  List<String> completedDates = completedRecords ?? [];
 
   List<DateTime> parsedDates = completedDates.map((dt) => DateTime.parse(dt)).toList();
 
@@ -53,8 +46,29 @@ Widget calendarBuilder () {
       ));
   }
 
-  return Column(
-    children: calendar,
+  // return ListView.builder(
+  //   padding: EdgeInsets.zero,
+  //   itemCount: calendar.length,
+  //   itemBuilder: (context, index) => calendar[index]
+  // );
+  // return ListView(
+  //   shrinkWrap: true,
+  //   physics: NeverScrollableScrollPhysics(),
+  //   children: calendar,
+  // );
+
+  // return Column(
+  //   children: calendar,
+  // );
+
+  return Expanded(
+    child: SingleChildScrollView(
+      child: Container(
+        child: Column(
+          children: calendar,
+        ),
+      ),
+    ),
   );
 }
 

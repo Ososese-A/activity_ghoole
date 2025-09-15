@@ -33,7 +33,7 @@ Widget nameFieldComponent ({required TextEditingController controller, String? t
   );
 }
 
-Widget durationFieldComponent ({required TextEditingController controller, required String unit, required List<String> units, required ValueChanged<String?>? onChanged}) {
+Widget durationFieldComponent ({required TextEditingController controller, required String unit, required List<String> units, required ValueChanged<String?>? onChanged, String? title}) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
     decoration: BoxDecoration(
@@ -53,8 +53,8 @@ Widget durationFieldComponent ({required TextEditingController controller, requi
               color: AppColors.priWhite
             ),
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              hintText: "Activity Duration",
+            decoration: InputDecoration(
+              hintText: title ?? "Activity Duration",
               hintStyle: TextStyle(
                 color: AppColors.secWhite
               ),
@@ -66,7 +66,9 @@ Widget durationFieldComponent ({required TextEditingController controller, requi
         ),
     
         // const SizedBox(width: 8.0,),
-    
+        if (title == null)
+        SizedBox.shrink()
+        else
         Expanded(
           flex: 1,
           child: DropdownButtonFormField<String>(
@@ -107,7 +109,7 @@ Widget durationFieldComponent ({required TextEditingController controller, requi
   );
 }
 
-Widget timeFieldComponent ({required TextEditingController controller, required List<String> options, required ValueChanged<String> onSelected}) {
+Widget timeFieldComponent ({required TextEditingController controller, required List<String> options, required ValueChanged<String> onSelected, String? title}) {
   return Autocomplete<String>(
     optionsBuilder: (TextEditingValue textEditingValue) {
       return options.where((option) => 
@@ -164,7 +166,7 @@ Widget timeFieldComponent ({required TextEditingController controller, required 
           contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
           filled: true,
           fillColor: AppColors.secBrown,
-          hintText: "Activity Time",
+          hintText: title ?? "Activity Time",
           hintStyle: TextStyle(
             color: AppColors.secWhite
           ),

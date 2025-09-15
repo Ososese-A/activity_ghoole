@@ -39,7 +39,7 @@ class ActivityService {
 
   }
 
-  Future<bool> updateActivity({required String activityId, String? activityName, String? activityDuration, String? activityTime, String? activityDetails}) async {
+  Future<bool> updateActivity({required String activityId, String? activityName, String? activityDuration, String? activityTime, String? activityDetails, String? updated}) async {
     bool success = false;
 
     try {
@@ -50,6 +50,27 @@ class ActivityService {
         if (activityDuration != null) activity.duration = activityDuration;
         if (activityTime != null) activity.time = activityTime;
         if (activityDetails != null) activity.details = activityDetails;
+        if (updated != null) activity.updated = updated;
+
+        await activity.save();
+
+        success = true;
+      }
+
+      return success;
+    } catch (e) {
+      return success;
+    }
+  }
+
+  Future<bool> updateActivityRecord ({required String activityId, required String activityUpdate}) async {
+    bool success = false;
+
+    try {
+      final activity = await fetchActivity(activityId: activityId);
+
+      if (activity != null ) {
+        activity.activityRecord = [...?activity.activityRecord, activityUpdate];
 
         await activity.save();
 

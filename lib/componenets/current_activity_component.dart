@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:project_ghoole/models/activity.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
 
-Widget currentActivityComponent () {
+Widget currentActivityComponent ({required Activity activity, required BuildContext context}) {
   return GestureDetector(
+    onTap: () {
+      Navigator.pushNamed(context, '/details', arguments: {
+        'id': activity.id,
+        'options': false
+      });
+    },
     child: Container(
       padding: EdgeInsets.all(24.0),
       decoration: BoxDecoration(
@@ -38,7 +45,7 @@ Widget currentActivityComponent () {
                   borderRadius: BorderRadius.circular(360.0),
                 ),
                 child: SvgPicture.asset(
-                  "assets/icons/design_w.svg",
+                  "assets/icons/${activity.tag}_w.svg",
                   height: 64.0,
                   width: 64.0,
                 ),
@@ -50,7 +57,7 @@ Widget currentActivityComponent () {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Figma (components & re-design)",
+                      activity.name,
                       softWrap: true,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
@@ -68,7 +75,7 @@ Widget currentActivityComponent () {
                         SvgPicture.asset("assets/icons/time_w.svg"),
                         SizedBox(width: 16.0,),
                         Text(
-                          "12:00 pm",
+                          activity.time,
                           style: TextStyle(
                             color: AppColors.priWhite
                           ),
@@ -83,7 +90,7 @@ Widget currentActivityComponent () {
                         SvgPicture.asset("assets/icons/duration_w.svg"),
                         SizedBox(width: 16.0,),
                         Text(
-                          "30 minutes",
+                          activity.duration,
                           style: TextStyle(
                             color: AppColors.priWhite
                           ),
