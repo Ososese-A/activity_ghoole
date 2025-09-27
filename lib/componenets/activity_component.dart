@@ -30,7 +30,6 @@ Widget activityComponent ({
         borderRadius: BorderRadius.circular(8.0)
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             padding: EdgeInsets.all(16.0),
@@ -57,14 +56,14 @@ Widget activityComponent ({
           // isSelectMode ? SizedBox(width: 16.0,) : SizedBox.shrink(),
           SizedBox(width: 16.0,),
 
-          SizedBox(
-            width: isSelectMode || isReordertMode ? 200 : 240.0,
+          Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   activityName,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: AppColors.secBrown,
                     fontSize: 16.0,

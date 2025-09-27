@@ -43,36 +43,38 @@ Widget txtBtnComponent ({required VoidCallback onTap, required String title}) {
 Widget tagBtnComponent ({required String title, required String icon, required VoidCallback onPressed, required bool isSelected}) {
   return GestureDetector(
     onTap: onPressed,
-    child: Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 32.0),
-      // width: 192.0,
-      decoration: BoxDecoration(
-        color: isSelected ? AppColors.secBrown : Colors.transparent,
-        border: Border.all(
-          width: 1,
-          color: AppColors.secBrown
-        ),
-        borderRadius: BorderRadius.circular(8.0)
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // SvgPicture.asset("assets/icons/design.svg"),
-          SvgPicture.asset(
-            icon,
-            height: 16.0,
-            width: 16.0,
+    child: IntrinsicWidth(
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 32.0),
+        // width: 192.0,
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.secBrown : Colors.transparent,
+          border: Border.all(
+            width: 1,
+            color: AppColors.secBrown
           ),
-          SizedBox(width: 8.0,),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16.0,
-              color: isSelected ? AppColors.secWhite : AppColors.secBrown
+          borderRadius: BorderRadius.circular(8.0)
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // SvgPicture.asset("assets/icons/design.svg"),
+            SvgPicture.asset(
+              icon,
+              height: 16.0,
+              width: 16.0,
             ),
-          )
-        ],
+            SizedBox(width: 8.0,),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: isSelected ? AppColors.secWhite : AppColors.secBrown
+              ),
+            )
+          ],
+        ),
       ),
     ),
   );

@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:project_ghoole/componenets/activity_component.dart';
 import 'package:project_ghoole/componenets/app_bar.dart';
 import 'package:project_ghoole/componenets/btn_component.dart';
+import 'package:project_ghoole/componenets/empty_state_component.dart';
+import 'package:project_ghoole/componenets/loading_component.dart';
 import 'package:project_ghoole/models/activity.dart';
 import 'package:project_ghoole/providers/activity_provider.dart';
 import 'package:project_ghoole/styles/app_colors.dart';
@@ -58,11 +60,12 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
         if (provider.isLoading) {
           return Scaffold(
             backgroundColor: AppColors.secWhite,
-            body: Center(child: CircularProgressIndicator(),),
+            body: loadingComponent(),
           );
         }
 
         final activities = provider.activities;
+        final isListEmpty = provider.activities.isEmpty;
 
         return Scaffold(
           backgroundColor: AppColors.secWhite,
@@ -128,194 +131,217 @@ class _MyActivitiesScreenState extends State<MyActivitiesScreen> {
             },
           ),
           body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0),
-            child: Stack(
+            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+            child: 
+            isListEmpty 
+            ?
+            _empty()
+            :
+            Stack(
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 24.0),
-                      child: Text(
-                        "My Activities",
-                        style: TextStyle(
-                          color: AppColors.secBrown,
-                          fontSize: 24.0,
-                          fontWeight: FontWeight.w500
+                /// 👇 Replace Column with CustomScrollView
+                CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 120.0),
+                        child: Text(
+                          "My Activities",
+                          style: TextStyle(
+                            color: AppColors.secBrown,
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
 
                     if (selectMode == "reorder")
-                    ReorderableListView.builder(
-                      shrinkWrap: true,
-                      itemCount: localReorderedList.length, 
-                      onReorder: (oldIndex, newIndex) async{
-                        setState(() {
-                          if (newIndex > oldIndex) newIndex -= 1;
-                          final item = localReorderedList.removeAt(oldIndex);
-                          localReorderedList.insert(newIndex, item);
-                        });
+                      SliverReorderableList(
+                        itemCount: localReorderedList.length,
+                        onReorder: (oldIndex, newIndex) async {
+                          setState(() {
+                            if (newIndex > oldIndex) newIndex -= 1;
+                            final item = localReorderedList.removeAt(oldIndex);
+                            localReorderedList.insert(newIndex, item);
+                          });
 
-                        provider.setActivities(localReorderedList);
-                        await provider.reorderActivities(activities: localReorderedList);
-                      },
-                      itemBuilder: (context, index) {
-                        final activity = localReorderedList[index];
-                        return Padding(
-                          key:  ValueKey(activity.id),
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.drag_handle, color: AppColors.secBrown,),
-                              SizedBox(width: 4.0,),
-                              Container(
-                                alignment: Alignment.center,
-                                constraints: BoxConstraints(
-                                  maxWidth: MediaQuery.of(context).size.width - 56
+                          provider.setActivities(localReorderedList);
+                          await provider.reorderActivities(activities: localReorderedList);
+                        },
+                        itemBuilder: (context, index) {
+                          final activity = localReorderedList[index];
+                          return Padding(
+                            key: ValueKey(activity.id),
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.drag_handle, color: AppColors.secBrown),
+                                SizedBox(width: 4.0),
+                                Container(
+                                  alignment: Alignment.center,
+                                  constraints: BoxConstraints(
+                                    maxWidth: MediaQuery.of(context).size.width - 56,
+                                  ),
+                                  child: activityComponent(
+                                    context: context,
+                                    activityId: activity.id,
+                                    activityName: activity.name,
+                                    activityDuration: activity.duration,
+                                    activityTime: activity.time,
+                                    activityDetails: activity.details,
+                                    activityTag: activity.tag,
+                                    isSelectMode: false,
+                                    isReordertMode: true,
+                                  ),
                                 ),
-                                child: activityComponent(
-                                  context: context,
-                                  activityId: activity.id,
-                                  activityName: activity.name,
-                                  activityDuration: activity.duration,
-                                  activityTime: activity.time,
-                                  activityDetails: activity.details,
-                                  activityTag: activity.tag,
-                                  isSelectMode: false,
-                                  isReordertMode: true
-                                ),
-                              )
-                            ],
-                          ),
-                        );
-                      },
-                    )
-
+                              ],
+                            ),
+                          );
+                        },
+                      )
                     else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: activities.length,
-                      itemBuilder: (context, index) {
-                        Activity activity = activities[index];
-
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            isSelectModeOn 
-                            ? 
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  if (selectedIndicies.contains(index)) {
-                                    selectedIndicies.remove(index);
-                                  } else {
-                                    selectedIndicies.add(index);
-                                  }
-                                });
-                              },
-                              child: selectedIndicies.contains(index) ? SvgPicture.asset("assets/icons/select.svg") : SvgPicture.asset("assets/icons/unselect.svg")
-                            ) 
-                            : 
-                            SizedBox.shrink(),
-
-                            isSelectModeOn 
-                            ? 
-                            SizedBox(width: 16.0,) 
-                            : 
-                            SizedBox.shrink(),
-                            Container(
-                              alignment: Alignment.center,
-                              child: activityComponent(
-                                context: context,
-                                activityId: activity.id,
-                                activityName: activity.name,
-                                activityDuration: activity.duration,
-                                activityTime: activity.time,
-                                activityDetails: activity.details,
-                                activityTag: activity.tag,
-                                isSelectMode: isSelectModeOn,
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final activity = activities[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  if (isSelectModeOn)
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          if (selectedIndicies.contains(index)) {
+                                            selectedIndicies.remove(index);
+                                          } else {
+                                            selectedIndicies.add(index);
+                                          }
+                                        });
+                                      },
+                                      child: selectedIndicies.contains(index)
+                                          ? SvgPicture.asset("assets/icons/select.svg")
+                                          : SvgPicture.asset("assets/icons/unselect.svg"),
+                                    ),
+                                  if (isSelectModeOn) SizedBox(width: 16.0),
+                                  Expanded(
+                                    child: activityComponent(
+                                      context: context,
+                                      activityId: activity.id,
+                                      activityName: activity.name,
+                                      activityDuration: activity.duration,
+                                      activityTime: activity.time,
+                                      activityDetails: activity.details,
+                                      activityTag: activity.tag,
+                                      isSelectMode: isSelectModeOn,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            )
-                          ],
-                        );
-                      }, 
-                      separatorBuilder: (context, index) => SizedBox(height: 16.0,)
-                    ),
+                            );
+                          },
+                          childCount: activities.length,
+                        ),
+                      ),
                   ],
                 ),
 
+                /// 👇 Bottom action bar stays fixed
                 if (isSelectModeOn)
                   Align(
                     alignment: Alignment.bottomCenter,
-                    child: Padding(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.secWhite,
+                        border: Border.all(
+                          width: 2.0,
+                          color: AppColors.secWhite
+                        )
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 24.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          if (selectMode == "reorder")
-                          SizedBox.shrink()
-                          else
-                          isAllSelected
-                          ?
-                          txtBtnComponent(
-                            onTap: () {
-                              setState(() {
-                                isAllSelected = false;
-                                selectedIndicies.clear();
-                              });
+                          if (selectMode != "reorder")
+                            isAllSelected
+                                ? txtBtnComponent(
+                                    onTap: () {
+                                      setState(() {
+                                        isAllSelected = false;
+                                        selectedIndicies.clear();
+                                      });
+                                    },
+                                    title: "Deselect All",
+                                  )
+                                : txtBtnComponent(
+                                    onTap: () {
+                                      setState(() {
+                                        List<int> newIndicies = List.generate(activities.length, (index) => index)
+                                            .where((i) => !selectedIndicies.contains(i))
+                                            .toList();
+                                        selectedIndicies.addAll(newIndicies);
+                                        isAllSelected = true;
+                                      });
+                                    },
+                                    title: "Select All",
+                                  ),
+                          btnComponent(
+                            onPressed: () async {
+                              if (selectMode == "reorder") {
+                                resetValues();
+                              } else if (selectMode == "mark") {
+                                final updatePayload = selectedIndicies
+                                    .map((index) => ActivityRecordUpdatePayload(
+                                        activityId: activities[index].id,
+                                        update: DateTime.now().toIso8601String()))
+                                    .toList();
+                                await provider.updateActivitiesRecord(updates: updatePayload);
+                                resetValues();
+                              } else {
+                                final activityIds = selectedIndicies.map((index) => activities[index].id).toList();
+                                await provider.removeActivies(activityIds: activityIds);
+                                resetValues();
+                              }
                             },
-                            title: "Deselect All"
-                          )
-                          :
-                          txtBtnComponent(onTap: () {
-                            setState(() {
-                              List<int> newIndicies = List.generate(activities.length, (index) => index).where((i) => !selectedIndicies.contains(i)).toList();
-                              selectedIndicies.addAll(newIndicies);
-                              isAllSelected = true;
-                            });
-                          }, title: "Select All"),
-
-                          if (selectMode == "reorder")
-                          btnComponent(onPressed: () {
-                            resetValues();
-
-                            resetValues();
-                          }, title: "Done") 
-
-                          else
-                          selectMode == "mark" 
-                          ? 
-                          btnComponent(onPressed: () async {
-                            final updatePayload = selectedIndicies.map((index) => ActivityRecordUpdatePayload(activityId: activities[index].id, update: DateTime.now().toIso8601String())).toList();
-                            await provider.updateActivitiesRecord(updates: updatePayload);
-
-                            resetValues();
-                          }, title: "Mark As Completed") 
-                          : 
-                          btnComponent(onPressed: () async {
-                            List<String> activityIds = selectedIndicies.map((index) => activities[index].id).toList();
-                            await provider.removeActivies(activityIds: activityIds);
-
-                            resetValues();
-                          }, title: "Delete Selected")
+                            title: selectMode == "reorder"
+                                ? "Done"
+                                : selectMode == "mark"
+                                    ? "Mark As Completed"
+                                    : "Delete Selected",
+                          ),
                         ],
                       ),
                     ),
-                  )
-
-                else 
-
-                  SizedBox.shrink()
+                  ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _empty () {
+    return Column (
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              "My Activities",
+              style: TextStyle(
+                color: AppColors.secBrown,
+                fontSize: 24.0,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+        ),
+
+        emptyState(context: context),
+      ],
     );
   }
 }

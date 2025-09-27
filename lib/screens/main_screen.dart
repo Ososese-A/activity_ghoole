@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:project_ghoole/componenets/activity_component.dart';
 import 'package:project_ghoole/componenets/btn_component.dart';
 import 'package:project_ghoole/componenets/current_activity_component.dart';
+import 'package:project_ghoole/componenets/empty_state_component.dart';
 import 'package:project_ghoole/componenets/field_component.dart';
 import 'package:project_ghoole/componenets/loading_component.dart';
 import 'package:project_ghoole/componenets/snack_component.dart';
@@ -137,35 +138,48 @@ class _MainScreenState extends State<MainScreen> {
         return Scaffold(
           backgroundColor: AppColors.secWhite,
           appBar: AppBar(
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                width: 2.0,
+                color: Colors.transparent
+              )
+            ),
+            // toolbarHeight: 40.0,
             backgroundColor: AppColors.secWhite,
-            leadingWidth: 120.0,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 14.0),
-              child: Text(
-                "GHOOLE",
-                softWrap: false,
-                style: TextStyle(
-                  color: AppColors.secBrown,
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.w700
-                ),
+            flexibleSpace: Padding(
+              padding: EdgeInsetsGeometry.only(top: 48.0, bottom: 0.0, left: 14.0, right: 14.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "GHOOLE",
+                    softWrap: false,
+                    style: TextStyle(
+                      color: AppColors.secBrown,
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.w700
+                    ),
+                  ),
+
+                  _moreOptions()
+                ],
               ),
             ),
-            actionsPadding: EdgeInsets.only(right: 14.0),
-            actions: [
-              _moreOptions()
-            ],
+            leading: SizedBox.shrink(),
           ),
           body: 
           isListEmpty
           ?
-          _emptyState()
+          emptyState(context: context)
           :
-          SingleChildScrollView(child: _activityState(
-            future: futureActivities, 
-            past: completedActivities, 
-            current: currentActivity
-          ))
+          Padding(
+            padding: const EdgeInsets.only(left: 14.0, right: 14.0, top: 32.0),
+            child: SingleChildScrollView(child: _activityState(
+              future: futureActivities, 
+              past: completedActivities, 
+              current: currentActivity
+            )),
+          )
         );
     
       }
@@ -224,30 +238,25 @@ class _MainScreenState extends State<MainScreen> {
               ),
             )
             :
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: 320.0
-              ),
-              child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: activities.length,
-                  itemBuilder: (context, index) {
-                    Activity activity = activities[index];
-              
-                    return activityComponent(
-                      context: context,
-                      activityId: activity.id,
-                      activityName: activity.name,
-                      activityDuration: activity.duration,
-                      activityTime: activity.time,
-                      activityDetails: activity.details,
-                      activityTag: activity.tag
-                    );
-                  }, 
-                  separatorBuilder:(context, index) {
-                    return SizedBox(height: 24.0,);
-                  },
-                ),
+            ListView.separated(
+              shrinkWrap: true,
+              itemCount: activities.length,
+              itemBuilder: (context, index) {
+                Activity activity = activities[index];
+          
+                return activityComponent(
+                  context: context,
+                  activityId: activity.id,
+                  activityName: activity.name,
+                  activityDuration: activity.duration,
+                  activityTime: activity.time,
+                  activityDetails: activity.details,
+                  activityTag: activity.tag
+                );
+              }, 
+              separatorBuilder:(context, index) {
+                return SizedBox(height: 24.0,);
+              },
             ),
         ],
       );
@@ -544,26 +553,51 @@ class _MainScreenState extends State<MainScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SvgPicture.asset("assets/icons/calendar.svg"),
+                  Row(
+                    children: [
+                      SvgPicture.asset("assets/icons/calendar.svg"),
+                      SizedBox(width: 8.0,),
+                      Text(
+                        "${getDisplayDate()} ",
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w500
+                        ),
+                      )
+                    ],
+                  ),
+              
                   SizedBox(width: 8.0,),
-                  Text(
-                    "${getDisplayDate()} ",
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500
-                    ),
+              
+                  Row(
+                    children: [
+                      SvgPicture.asset("assets/icons/work_time.svg"),
+                      SizedBox(width: 8.0,),
+                      Text(
+                        "${provider.startTime} - ${provider.endTime}",
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w500
+                        ),
+                      ),
+                    ],
                   )
                 ],
               ),
 
-              Text(
-                "[${provider.startTime} - ${provider.endTime}]",
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w500
-                ),
+              GestureDetector(
+                onTap: () {
+                  provider.loadActivities();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    snackComponent(title: "Activities reloaded Successfully")
+                  );
+                },
+                child: SvgPicture.asset("assets/icons/refresh.svg")
               )
             ],
           ),
@@ -584,56 +618,6 @@ class _MainScreenState extends State<MainScreen> {
           _completedActivity(activities: past)
         ],
       ),
-    );
-  }
-
-  Widget _emptyState () {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1,
-          color: Colors.transparent
-        )
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SvgPicture.asset("assets/icons/nill.svg"),
-  
-            SizedBox(height: 32.0,),
-  
-            Text(
-              "No Activity Found",
-              style: TextStyle(
-                fontSize: 24.0,
-                color: AppColors.secBrown,
-                fontWeight: FontWeight.w600
-              ),
-            ),
-  
-            SizedBox(height: 16.0,),
-  
-            Text(
-              "Add in a new activity and let Ghoole do it’s work",
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.secBrown
-              ),
-            ),
-  
-            SizedBox(height: 32.0,),
-  
-            btnComponent(
-              onPressed: () {
-                Navigator.pushNamed(context, '/new');
-              },
-              title: "Add Activity"
-            )
-          ],
-        ),
     );
   }
 }

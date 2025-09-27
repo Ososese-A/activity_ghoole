@@ -54,8 +54,11 @@ Widget currentActivityComponent ({required Activity activity, required BuildCont
                   width: 64.0,
                 ),
               ),
+
+              SizedBox(width: 24.0,),
+
               SizedBox(
-                width: 200.0,
+                width: 160.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,

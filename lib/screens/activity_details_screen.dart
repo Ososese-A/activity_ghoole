@@ -107,57 +107,66 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
                           width: 16.0,
                         ),
 
-                        SizedBox(
-                          width: 260.0,
+                        Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                activity.name,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: AppColors.secBrown,
-                                  fontSize: 24.0,
-                                  fontWeight: FontWeight.w500
-                                ),
-                              ),
-
-                              SizedBox(height: 16.0,),
-
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                LayoutBuilder(builder: (context, constraints) {
+                                  return ConstrainedBox(
+                                    constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                                    child: Text(
+                                      activity.name,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: AppColors.secBrown,
+                                        fontSize: 24.0,
+                                        fontWeight: FontWeight.w500
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          
+                                SizedBox(height: 16.0,),
+                          
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: 160.0
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      SvgPicture.asset("assets/icons/time.svg"),
-                                      SizedBox(width: 16.0,),
-                                      Text(
-                                        activity.time,
-                                        style: TextStyle(
-                                          color: AppColors.secBrown
-                                        ),
-                                      )
+                                      Row(
+                                        children: [
+                                          SvgPicture.asset("assets/icons/time.svg"),
+                                          SizedBox(width: 8.0,),
+                                          Text(
+                                            activity.time,
+                                            style: TextStyle(
+                                              color: AppColors.secBrown
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                  
+                                      Row(
+                                        children: [
+                                          SvgPicture.asset("assets/icons/duration.svg"),
+                                          SizedBox(width: 8.0,),
+                                          Text(
+                                            activity.duration,
+                                            style: TextStyle(
+                                              color: AppColors.secBrown
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ],
                                   ),
-
-                                  Row(
-                                    children: [
-                                      SvgPicture.asset("assets/icons/duration.svg"),
-                                      SizedBox(width: 16.0,),
-                                      Text(
-                                        activity.duration,
-                                        style: TextStyle(
-                                          color: AppColors.secBrown
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        )
+                                )
+                              ],
+                            ),
+                        ),
                       ],
                     ),
 
